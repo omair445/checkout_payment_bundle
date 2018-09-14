@@ -54,8 +54,13 @@ in the ``app/AppKernel.php`` file of your project:
         // ...
     }
 
+Step 2: Enable the Bundle
+~~~~~~~~~~~~~~~~~~~~~~~~~
+Step 3 : Configurations:
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Add these in parameters.yml 
 
 
-**_Author_: Omair Afzal
-_Organization_: Eureka Technology Studio**
-
+    checkout_sdk_env: sandbox
+#    checkout_sdk_env: live
