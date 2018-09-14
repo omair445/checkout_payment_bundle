@@ -8,12 +8,12 @@ Checkout Payment SDK Bundle
 Installation
 ============
 
-Applications that use Symfony Flex
+Applications that use Symfony 2.8 - 3.4
 ----------------------------------
 
 Open a command console, enter your project directory and execute:
 
-.. code-block:: bash
+
 
     $ composer require checkout/payment_sdk_bundle
 
