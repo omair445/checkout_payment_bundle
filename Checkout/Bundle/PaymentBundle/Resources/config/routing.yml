@@ -1,0 +1,3 @@
+checkout_payment_homepage:
+    path:     /
+    defaults: { _controller: CheckoutPaymentBundle:Default:index }

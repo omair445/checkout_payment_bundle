@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.min.css">
+    <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/arrive/2.4.1/arrive.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js"></script>
+</head>
+<body>
+<div id="displayBox" style="display: none;">
+
+    <img src="http://stagingcoredirection.engagiv.com/images/checkout/ajax-loader.gif" />
+    <br><br><p style="color: lavender;font-size: 9px;font-family: sans-serif;">&nbsp;</p>
+</div>
+
+<div id="wrapper">
+    <header>
+        <div class="container-fluid">
+            <div class="row">
+                <div style="background-color: #3075dd;" class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                    <div class="site-header "></div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div class="msg"></div>
+    <div class="container-fluid content_holder">
+        <div class="row main-content">
+            <div class="cover">
+                <div class="table">
+                    <div class="table-cell">
+                        <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12 center_msg"
+                             style="font-family: Arial;font-size:14px;text-align: center;padding: 20px;">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                    Copyright - 2017
+                    <a target="_blank" href="https://www.checkout.com/"
+                       style="color: #fff; font-family: arial;font-size:12px;">Checkout.com</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<form class="payment-form" name="checkout-form" method="POST" action="">
+    <script src="{{ data_array['checkout_js_url'] }}"></script>
+    <script>
+        if ( window.history.replaceState ) {
+            window.history.replaceState( null, null, window.location.href );
+        }
+
+
+        var app_data="";
+        var $cardTokenised = false;
+        Checkout.render({
+            publicKey: '{{ data_array['publicKey'] }}',
+            value: {{ data_array['value'] }},
+            currency: '{{ data_array['currency'] }}',
+            useCurrencyCode:true,
+            cardFormMode: 'cardTokenisation',
+            customerName: '{{ data_array['customerName'] }}',
+            paymentMode: 'cards',
+            countryCode: '{{ data_array['customerName'] }}',
+            renderMode: 4,
+            buttonLabel: 'BUY NOW',
+            redirectUrl: '{{ path('paymentSuccess') }}',
+            // redirectUrl: 'http://coredirection.engagiv.com/web/images/logo.png',
+            // forceRedirect: true,
+            title: '{{ data_array['userName'] }}',
+            // logoUrl: 'http://coredirection.engagiv.com/web/images/logo.png',
+            formButtonLabel: 'Pay Now',
+            useMobileLightbox: true,//cardTokenised
+            lightboxDeactivated: function (event) {
+                if($cardTokenised == false)
+                    Checkout.open();
+            },
+            cardTokenised: function (event) {
+                $cardTokenised = true;
+            }
+        });
+
+        Checkout.addEventHandler(Checkout.Events.CARD_TOKENISED, function (event) {
+            blockUICust();
+            console.log($('.payment-form').serialize());
+
+            $.ajax({
+                type: "POST",
+                data: $('.payment-form').serialize(),
+                dataType: 'json',
+                url: "{{ path('paymentSuccess') }}",
+                success: function ( $object ) {
+                    console.log($object);
+                    // $object = JSON.parse($object);
+                    $html = $object.html;
+                    delete $object.html;
+                    app_data=$object;
+
+
+                    $.unblockUI();
+
+                    $('.content_holder').html( $html );
+                    if($object.error == 200){
+                        window.location.href="https://www.coredirection.com/core-pass-promo-thank-you";
+                    }
+                    $(".btn_notify").trigger("click");
+
+                },
+                error: function ( $object ) {
+
+                    $object = JSON.parse($object);
+                    $html = $object.html;
+                    delete $object.html;
+
+                    $.unblockUI();
+                    $('.content_holder').html( $html );
+                }
+            })
+        });
+    </script>
+    <input type="hidden" name="hidden_cart_data" value="{{ str }}">
+</form>
+
+<script>
+    var ua = navigator.userAgent.toLowerCase();
+    var isAndroid = ua.indexOf("android") > -1; //&& ua.indexOf("mobile");
+    var ismobile=navigator.userAgent.match(/(iPad)|(iPhone)|(iPod)|(android)|(webOS)/i);
+
+
+
+    $( document ).ready(function() {
+
+        $('body').on('click', '.btn_success_close', function(e){
+
+            if(window.webkit)
+                window.location.href="https://www.coredirection.com/core-pass-promo";
+
+            if(isAndroid)
+            // window.JSInterface.successCheckoutHandler(JSON.stringify(app_data));
+            //     window.location.replace("https://www.coredirection.com/core-pass-promo");
+                window.location.href="https://www.coredirection.com/core-pass-promo";
+        });
+
+        $('body').on('click', '.btn_notify', function(e){
+
+            if(window.webkit)
+            // window.webkit.messageHandlers.notifyCheckoutHandler.postMessage( app_data );
+            // window.location.replace("https://www.coredirection.com/core-pass-promo");
+                window.location.href="https://www.coredirection.com/core-pass-promo";
+            if(isAndroid)
+            // window.JSInterface.notifyCheckoutHandler(JSON.stringify(app_data));
+                window.location.href="https://www.coredirection.com/core-pass-promo";
+
+        });
+
+
+        $('body').on('click', '.btn_error_close', function(e){
+            window.location.href="https://www.coredirection.com/core-pass-promo";
+            if(window.webkit)
+            // window.webkit.messageHandlers.errorCheckoutHandler.postMessage( app_data );
+                window.location.href="https://www.coredirection.com/core-pass-promo";
+            if(isAndroid)
+            // window.JSInterface.errorCheckoutHandler(JSON.stringify(app_data));
+                window.location.href="https://www.coredirection.com/core-pass-promo";
+        });
+
+    });// document.ready
+
+    // watch for removal of an element which satisfies the selector ".test-elem"
+    $("body").arrive("iframe", function () {
+        $.unblockUI();
+    });
+
+    $("body").leave("iframe", function () {
+        blockUICust();
+    });
+
+    $(window).load(function() {//alert(sd);
+        blockUICust();
+    });
+
+    function blockUICust(){
+        $.blockUI({
+            message: $('#displayBox'), css: {
+                border: 'none',
+                backgroundColor: '#1A1A1A',
+                '-webkit-border-radius': '10px',
+                '-moz-border-radius': '10px',
+                color: '#fff'
+            }
+        })
+    }
+
+
+    function googlePaymentTracking(value,transactionId,packageName) {
+        gtag('event', 'conversion', {
+            'send_to': 'AW-857646303/zX2DCPiz8IcBEN_J-pgD',
+            'value':value,
+            'currency': 'AED',
+            'transaction_id': transactionId
+        });
+        ga('require', 'ecommerce');
+        ga('ecommerce:addTransaction', {
+            'id': transactionId,                     // Transaction ID. Required.
+            'affiliation': 'Core Direction',   // Affiliation or store name.
+            'revenue': value,               // Grand Total.
+            'shipping': '0',                  // Shipping.
+            'tax': '0'                     // Tax.
+        });
+        ga('ecommerce:addItem', {
+            'id': transactionId,                     // Transaction ID. Required.
+            'name': packageName,    // Product name. Required.
+            'sku': transactionId,                 // SKU/code.
+            'price': value,                 // Unit price.
+            'quantity': '1'                   // Quantity.
+        });
+        ga('ecommerce:send');
+
+        return true;
+    }
+
+    function facebookPaymentTracking(value,transactionId,packageName) {
+        fbq('track', 'Purchase', {
+            value: value,
+            currency: 'AED',
+            contents: [
+                {
+                    id: packageName,
+                    quantity: 1,
+                    item_price: value
+                }
+            ]
+        });
+    }
+
+
+
+
+</script>
+
+
+<style>
+    .blockUI.blockOverlay{
+        opacity: 0.9 !important;
+    }
+
+    .blockUI.blockMsg{
+        background: none !important;
+    }
+
+    html, body {
+        width: 100%;
+        height: 100%;
+    }
+
+    #wrapper {
+        position: relative;
+        overflow: hidden;
+        display: table;
+        width: 100%;
+        height: 100%;
+    }
+
+    .cover {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+
+    .cover .table {
+        display: table;
+        width: 100%;
+        height: 100%;
+    }
+
+    .cover .table-cell {
+        display: table-cell;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .site-header {
+        background-image: url("https://sandbox.checkout.com/assets/images/cko-logo-white.svg");
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-size: 85% auto;
+        border-right: 1px solid #235abf;
+        height: 60px;
+    }
+
+    footer {
+        display: table-footer-group;
+        background-color: #4c4c4c;
+        height: 30px;
+        color: #fff;
+        font-family: arial;
+        font-size: 12px;
+        text-align: center;
+    }
+
+    footer .container-fluid {
+        padding-top: 7px;
+    }
+
+    @media only screen and (min-width: 320px) {
+        .main-content {
+            height: 100%;
+        }
+
+        .site-header {
+            width: 45%;
+        }
+    }
+
+    @media only screen and (min-width: 360px) {
+        .main-content {
+            min-height: 550px;
+        }
+
+        .site-header {
+            width: 45%;
+        }
+    }
+
+    /*@media only screen and (min-width: 600px) {*/
+
+    /*}*/
+
+    /*// Larger pads*/
+    @media only screen and (min-width: 768px) {
+        .main-content {
+            min-height: 934px;
+        }
+
+        .site-header {
+            width: 20%;
+        }
+    }
+
+    @media only screen and (min-width: 800px) {
+        .main-content {
+            min-height: 1190px;
+        }
+
+        .site-header {
+            width: 20%;
+        }
+    }
+
+    /*// Horizontal pads and laptops*/
+    @media only screen and (min-width: 980px) {
+        .main-content {
+            min-height: 1190px;
+        }
+
+        .site-header {
+            width: 20%;
+        }
+    }
+
+    /*// Horizontal pads and laptops*/
+    @media only screen and (min-width: 992px) {
+        .main-content {
+            min-height: 1190px;
+        }
+
+        .site-header {
+            width: 20%;
+        }
+    }
+
+    /*// Really large screens*/
+    @media only screen and (min-width: 1024px) {
+        .main-content {
+            min-height: 510px;
+        }
+
+        .site-header {
+            width: 15%;
+        }
+    }
+
+    /*// Really large screens*/
+    @media only screen and (min-width: 1382px) {
+        .main-content {
+            min-height: 810px;
+        }
+
+        .site-header {
+            width: 15%;
+        }
+    }
+</style>
+</body>
+</html>

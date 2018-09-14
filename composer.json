@@ -1,0 +1,30 @@
+{
+  "name" : "checkout/payment_sdk_bundle",
+  "description" : "Checkout Payment Gateway Bundle",
+  "type" : "symfony-bundle",
+  "authors" : [{
+    "name" : "omair afzal",
+    "email" : "omair.mairy@gmail.com"
+  }],
+  "keywords" : [
+    "checkout","payment","payment_gateway"
+  ],
+  "license" : [
+    "MIT"
+  ],
+  "require" : {
+  },
+  "autoload" : {
+    "psr-0" : {
+      "Checkout\\PaymentBundle" : ""
+    }
+  },
+  "target-dir" : "stc/Checkout",
+  "repositories" : [{
+  }],
+  "extra" : {
+    "branch-alias" : {
+      "dev-master" : "1.0"
+    }
+  }
+}
