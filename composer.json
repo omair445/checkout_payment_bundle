@@ -13,6 +13,7 @@
     "MIT"
   ],
   "require" : {
+    "checkout/payment_sdk_bundle":"*"
   },
   "autoload" : {
     "psr-0" : {
