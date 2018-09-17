@@ -19,7 +19,7 @@
       "Checkout\\PaymentBundle" : ""
     }
   },
-  "target-dir" : "stc/Checkout",
+  "target-dir" : "src/Checkout",
   "repositories" : [{
   }],
   "extra" : {
